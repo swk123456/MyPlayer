@@ -38,8 +38,7 @@
   </ImportGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'" Label="QtSettings">
     <QtInstall>5.15.2_msvc2019_64</QtInstall>
-    <QtModules>
-    </QtModules>
+    <QtModules>core;opengl;gui;widgets</QtModules>
     <QtBuildConfig>release</QtBuildConfig>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|Win32'" Label="QtSettings">
@@ -105,10 +104,15 @@
     <ClCompile Include="AVPacketQueue.cpp" />
     <ClCompile Include="AVSync.cpp" />
     <ClCompile Include="DecodeThread.cpp" />
+    <ClCompile Include="DecodeVideoThread.cpp" />
     <ClCompile Include="DemuxThread.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="QImageQueue.cpp" />
     <ClCompile Include="Thread.cpp" />
+    <ClCompile Include="Utility.cpp" />
+    <ClCompile Include="VideoForm.cpp" />
     <ClCompile Include="VideoOutput.cpp" />
+    <ClCompile Include="VideoQtOutput.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AudioOutput.h" />
@@ -116,9 +120,14 @@
     <ClInclude Include="AVPacketQueue.h" />
     <ClInclude Include="AVSync.h" />
     <ClInclude Include="DecodeThread.h" />
+    <ClInclude Include="DecodeVideoThread.h" />
     <ClInclude Include="DemuxThread.h" />
+    <ClInclude Include="QImageQueue.h" />
     <ClInclude Include="Queue.h" />
     <ClInclude Include="Thread.h" />
+    <ClInclude Include="Utility.h" />
+    <ClInclude Include="VideoQtOutput.h" />
+    <QtMoc Include="VideoForm.h" />
     <ClInclude Include="VideoOutput.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -18,7 +18,7 @@ public:
 
 	AVCodecContext* getAVCodecContext();
 
-private:
+protected:
 	char errStr[256] = { 0 };
 	std::string threadName = nullptr;
 	AVCodecContext* codecCtx = nullptr;
