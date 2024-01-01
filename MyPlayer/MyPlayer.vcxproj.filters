@@ -50,6 +50,15 @@
     <ClCompile Include="AVSync.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="PlayerControl.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MyPlayer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Slider.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Thread.h">
@@ -73,11 +82,22 @@
     <ClInclude Include="AudioOutput.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="VideoOutput.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="AVSync.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="PlayerControl.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <QtMoc Include="VideoOutput.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="Slider.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="MyPlayer.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
   </ItemGroup>
 </Project>

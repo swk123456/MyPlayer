@@ -15,10 +15,12 @@ public:
 	DemuxThread(AVPacketQueue* audioQueue, AVPacketQueue* videoQueue);
 	virtual ~DemuxThread();
 
-	int Init(const char* url);
+	int Init(const char* url, long long& totalPts);
 	virtual int Start();
 	virtual int Stop();
 	virtual void Run();
+
+	int ResetStartPts(long long& pts);
 
 	AVCodecParameters* AudioCodecParameters();
 	AVCodecParameters* VedioCodecParameters();

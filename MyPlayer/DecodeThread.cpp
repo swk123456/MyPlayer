@@ -1,7 +1,7 @@
 #include "DecodeThread.h"
 
-DecodeThread::DecodeThread(AVPacketQueue* packetQueue, AVFrameQueue* frameQueue, std::string threadName)
-	: packetQueue(packetQueue), frameQueue(frameQueue), threadName(threadName)
+DecodeThread::DecodeThread(AVPacketQueue* packetQueue, AVFrameQueue* frameQueue, AVRational timeBase, std::string threadName)
+	: packetQueue(packetQueue), frameQueue(frameQueue), timebase(timeBase), threadName(threadName)
 {
 }
 
@@ -42,12 +42,18 @@ int DecodeThread::Init(AVCodecParameters* par)
 
 int DecodeThread::Start()
 {
+	if (thread_ && pause_ == 1)
+	{
+		pause_ = 0;
+		return 0;
+	}
 	thread_ = new std::thread(&DecodeThread::Run, this);
 	if (!thread_)
 	{
 		printf("%s new DecodeThread failed\n", threadName.c_str());
 		return -1;
 	}
+	printf("%s new DecodeThread success\n", threadName.c_str());
 	return 0;
 }
 
@@ -68,7 +74,12 @@ void DecodeThread::Run()
 		{
 			break;
 		}
-		if (frameQueue->Size() > 10)
+		if (pause_ == 1)
+		{
+			std::this_thread::sleep_for(std::chrono::milliseconds(500));
+			continue;
+		}
+		if (frameQueue->Size() > 100)
 		{
 			std::this_thread::sleep_for(std::chrono::milliseconds(10));
 			continue;
@@ -78,6 +89,7 @@ void DecodeThread::Run()
 		if (!packet)
 		{
 			printf("%s no packet!\n", threadName.c_str());
+			std::this_thread::sleep_for(std::chrono::milliseconds(10));
 			continue;
 		}
 		//ËÍ¸ø½âÂëÆ÷
@@ -99,8 +111,9 @@ void DecodeThread::Run()
 			ret = avcodec_receive_frame(codecCtx, frame);
 			if (ret == 0)
 			{
+				double pts = frame->pts * av_q2d(timebase);
 				frameQueue->Push(frame);
-				printf("%s frameQueue size:%d\n", threadName.c_str(), frameQueue->Size());
+				printf("%s frameQueue size:%d, pts:%lf\n", threadName.c_str(), frameQueue->Size(), pts);
 				continue;
 			}
 			else if (ret == AVERROR(EAGAIN))

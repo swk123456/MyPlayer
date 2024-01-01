@@ -1,7 +1,7 @@
 #include "VideoOutput.h"
 
-VideoOutput::VideoOutput(AVSync* avsync, AVFrameQueue* frameQueue, int video_width, int video_height, AVRational timebase)
-	: avsync(avsync), frameQueue(frameQueue), videoWidth(video_width), videoHeight(video_height), timebase(timebase)
+VideoOutput::VideoOutput(QWidget* parent)
+	: QWidget(parent)
 {
 }
 
@@ -9,15 +9,22 @@ VideoOutput::~VideoOutput()
 {
 }
 
-int VideoOutput::Init()
+int VideoOutput::Init(AVSync* avsync_, AVFrameQueue* frame_queue, int video_width, int video_height, AVRational time_base)
 {
+	avsync = avsync_;
+	frameQueue = frame_queue;
+	videoWidth = video_width;
+	videoHeight = video_height;
+	timebase = time_base;
+
 	if (SDL_Init(SDL_INIT_VIDEO))
 	{
 		printf("SDL_Init failed\n");
 		return -1;
 	}
-	window = SDL_CreateWindow("PLAYER", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-		videoWidth, videoHeight, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
+	/*window = SDL_CreateWindow("PLAYER", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
+		videoWidth, videoHeight, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);*/
+	window = SDL_CreateWindowFrom((void*)this->winId());
 	if (!window)
 	{
 		printf("SDL_CreateWindow failed\n");
@@ -39,11 +46,24 @@ int VideoOutput::Init()
 	return 0;
 }
 
+int VideoOutput::DeInit()
+{
+	SDL_Quit();
+	window = nullptr;
+	renderer = nullptr;
+	texture = nullptr;
+	return 0;
+}
+
 int VideoOutput::MainLoop()
 {
 	SDL_Event event;
 	while (true)
 	{
+		if (pause_)
+		{
+			std::this_thread::sleep_for(std::chrono::milliseconds(500));
+		}
 		RefreshLoopWaitEvent(&event);
 		switch (event.type)
 		{
@@ -65,12 +85,35 @@ int VideoOutput::MainLoop()
 	return 0;
 }
 
+int VideoOutput::Start()
+{
+	if (pause_)
+	{
+		pause_ = 0;
+	}
+	return 0;
+}
+
+int VideoOutput::Pause()
+{
+	pause_ = 1;
+	return 0;
+}
+
 void VideoOutput::RefreshLoopWaitEvent(SDL_Event* event)
 {
 	double remainTime = 0.0;
 	SDL_PumpEvents();
-	while (!SDL_PeepEvents(event, 1, SDL_GETEVENT, SDL_FIRSTEVENT, SDL_LASTEVENT))
+	while (true)
 	{
+		if (pause_)
+		{
+			break;
+		}
+		if (SDL_PeepEvents(event, 1, SDL_GETEVENT, SDL_FIRSTEVENT, SDL_LASTEVENT))
+		{
+			break;
+		}
 		if (remainTime > 0.0)
 		{
 			std::this_thread::sleep_for(std::chrono::milliseconds(int64_t(remainTime * 1000)));
@@ -78,6 +121,12 @@ void VideoOutput::RefreshLoopWaitEvent(SDL_Event* event)
 		videoRefresh(remainTime);
 		SDL_PumpEvents();
 	}
+}
+
+void VideoOutput::ResetSize(int video_width, int video_height)
+{
+	videoWidth = video_width;
+	videoHeight = video_height;
 }
 
 void VideoOutput::videoRefresh(double& remainTime)

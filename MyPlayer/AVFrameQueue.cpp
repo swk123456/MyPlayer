@@ -26,6 +26,16 @@ int AVFrameQueue::Push(AVFrame* val)
 	return queue_.Push(tmp_frame);
 }
 
+int AVFrameQueue::Clear()
+{
+	release();
+	if (queue_.Size() != 0)
+	{
+		return -1;
+	}
+	return 0;
+}
+
 AVFrame* AVFrameQueue::Pop(const int timeout)
 {
 	AVFrame* tmp_frame = nullptr;

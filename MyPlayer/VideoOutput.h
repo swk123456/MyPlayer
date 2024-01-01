@@ -1,5 +1,6 @@
 #pragma once
 
+#include <QWidget>
 #include "AVFrameQueue.h"
 #include "AVSync.h"
 
@@ -10,15 +11,23 @@ extern "C"
 #include <SDL.h>
 }
 
-class VideoOutput
+class VideoOutput : public QWidget
 {
+	Q_OBJECT
 public:
-	VideoOutput(AVSync* avsync,AVFrameQueue* frameQueue, int video_width, int video_height, AVRational timebase);
+	VideoOutput(QWidget* parent = nullptr);
 	~VideoOutput();
 
-	int Init();
+	int Init(AVSync* avsync, AVFrameQueue* frameQueue, int video_width, int video_height, AVRational timebase);
+	int DeInit();
 	int MainLoop();
 	void RefreshLoopWaitEvent(SDL_Event* event);
+
+	void ResetSize(int video_width, int video_height);
+
+public slots:
+	int Start();
+	int Pause();
 
 private:
 	void videoRefresh(double& remainTime);
@@ -32,5 +41,7 @@ private:
 
 	AVRational timebase;
 	AVSync* avsync = nullptr;
+
+	int pause_ = 0;//当该参数为1时暂停
 };
 

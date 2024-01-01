@@ -24,6 +24,8 @@ public:
 
 	int Init();
 	int DeInit();
+	int Start();
+	int Pause();
 
 	AVFrameQueue* getFrameQueue();
 	AudioParams getSrcTgt();

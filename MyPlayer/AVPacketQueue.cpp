@@ -26,6 +26,16 @@ int AVPacketQueue::Push(AVPacket* val)
 	return queue_.Push(tmp_pkt);
 }
 
+int AVPacketQueue::Clear()
+{
+	release();
+	if (queue_.Size() != 0)
+	{
+		return -1;
+	}
+	return 0;
+}
+
 AVPacket* AVPacketQueue::Pop(const int timeout)
 {
 	AVPacket* tmp_pkt = nullptr;
@@ -38,6 +48,20 @@ AVPacket* AVPacketQueue::Pop(const int timeout)
 		}
 	}
 	return tmp_pkt;
+}
+
+AVPacket* AVPacketQueue::Front()
+{
+	AVPacket* tmp_packet = nullptr;
+	int ret = queue_.Front(tmp_packet);
+	if (ret < 0)
+	{
+		if (ret == -1)
+		{
+			printf("queue_ abort\n");
+		}
+	}
+	return tmp_packet;
 }
 
 void AVPacketQueue::release()

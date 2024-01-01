@@ -10,6 +10,10 @@ Thread::~Thread()
 
 int Thread::Start()
 {
+	if (pause_ == 1)
+	{
+		pause_ = 0;
+	}
 	return 0;
 }
 
@@ -22,5 +26,11 @@ int Thread::Stop()
 		delete thread_;
 		thread_ = nullptr;
 	}
+	return 0;
+}
+
+int Thread::Pause()
+{
+	pause_ = 1;
 	return 0;
 }

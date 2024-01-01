@@ -10,7 +10,7 @@ DemuxThread::~DemuxThread()
 {
 }
 
-int DemuxThread::Init(const char* url)
+int DemuxThread::Init(const char* url, long long& totalPts)
 {
 	if (!url)
 	{
@@ -40,6 +40,8 @@ int DemuxThread::Init(const char* url)
 
 	av_dump_format(ifmt_ctx_, 0, url, 0);
 
+	totalPts = ifmt_ctx_->duration;
+
 	audioStream = av_find_best_stream(ifmt_ctx_, AVMEDIA_TYPE_AUDIO, -1, -1, NULL, 0);
 	videoStream = av_find_best_stream(ifmt_ctx_, AVMEDIA_TYPE_VIDEO, -1, -1, NULL, 0);
 	printf("%s(%d) av_find_best_stream: audioStream:%d videoStream:%d\n", __FUNCTION__, __LINE__, audioStream, videoStream);
@@ -53,12 +55,18 @@ int DemuxThread::Init(const char* url)
 
 int DemuxThread::Start()
 {
+	if (thread_ && pause_ == 1)
+	{
+		pause_ = 0;
+		return 0;
+	}
 	thread_ = new std::thread(&DemuxThread::Run, this);
 	if (!thread_)
 	{
 		printf("new DemuxThread failed\n");
 		return -1;
 	}
+	printf("new DemuxThread success\n");
 	return 0;
 }
 
@@ -79,10 +87,19 @@ void DemuxThread::Run()
 		{
 			break;
 		}
+		if (pause_ == 1)
+		{
+			std::this_thread::sleep_for(std::chrono::milliseconds(500));
+			continue;
+		}
 		if (audioQueue->Size() > 100 || videoQueue->Size() > 100)
 		{
 			std::this_thread::sleep_for(std::chrono::milliseconds(10));
 			continue;
+		}
+		if (!ifmt_ctx_)
+		{
+			break;
 		}
 		ret = av_read_frame(ifmt_ctx_, &packet);
 		if (ret < 0)
@@ -108,6 +125,29 @@ void DemuxThread::Run()
 	}
 	avformat_close_input(&ifmt_ctx_);
 	std::cout << "DemuxThread::Run() leave" << std::endl;
+}
+
+int DemuxThread::ResetStartPts(long long& pts)
+{
+	if (pts > ifmt_ctx_->duration)
+	{
+		printf("%s(%d) ResetStartPts failed becase pts is too large\n", __FUNCTION__, __LINE__);
+		return -1;
+	}
+	int ret = avformat_flush(ifmt_ctx_);
+	if (ret < 0)
+	{
+		printf("%s(%d) avformat_flush failed\n", __FUNCTION__, __LINE__);
+		return -1;
+	}
+	long long seekPos = pts;
+	ret = av_seek_frame(ifmt_ctx_, -1, seekPos, AVSEEK_FLAG_BACKWARD | AVSEEK_FLAG_FRAME);
+	if (ret < 0)
+	{
+		printf("%s(%d) audio av_seek_frame failed\n", __FUNCTION__, __LINE__);
+		return -1;
+	}
+	return 0;
 }
 
 AVCodecParameters* DemuxThread::AudioCodecParameters()

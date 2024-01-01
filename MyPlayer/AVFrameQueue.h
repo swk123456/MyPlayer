@@ -15,6 +15,7 @@ public:
 	void Abort();
 	int Size();
 	int Push(AVFrame* val);
+	int Clear();
 	AVFrame* Pop(const int timeout);
 	AVFrame* Front();
 

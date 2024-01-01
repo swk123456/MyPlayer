@@ -38,8 +38,7 @@
   </ImportGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'" Label="QtSettings">
     <QtInstall>5.15.2_msvc2019_64</QtInstall>
-    <QtModules>
-    </QtModules>
+    <QtModules>core;gui;widgets</QtModules>
     <QtBuildConfig>release</QtBuildConfig>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|Win32'" Label="QtSettings">
@@ -107,6 +106,9 @@
     <ClCompile Include="DecodeThread.cpp" />
     <ClCompile Include="DemuxThread.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="MyPlayer.cpp" />
+    <ClCompile Include="PlayerControl.cpp" />
+    <ClCompile Include="Slider.cpp" />
     <ClCompile Include="Thread.cpp" />
     <ClCompile Include="VideoOutput.cpp" />
   </ItemGroup>
@@ -117,9 +119,12 @@
     <ClInclude Include="AVSync.h" />
     <ClInclude Include="DecodeThread.h" />
     <ClInclude Include="DemuxThread.h" />
+    <QtMoc Include="MyPlayer.h" />
+    <ClInclude Include="PlayerControl.h" />
     <ClInclude Include="Queue.h" />
+    <QtMoc Include="Slider.h" />
     <ClInclude Include="Thread.h" />
-    <ClInclude Include="VideoOutput.h" />
+    <QtMoc Include="VideoOutput.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">

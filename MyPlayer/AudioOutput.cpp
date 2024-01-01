@@ -21,11 +21,12 @@ void sdl_audio_callback(void* userdata, Uint8* stream, int len)
 			//读取pcm数据
 			audioOutput->audioBufIndex = 0;
 			AVFrame* frame = audioOutput->getFrameQueue()->Pop(2);
-			audioOutput->pts = frame->pts * av_q2d(audioOutput->timebase);
 
 			//重采样
 			if (frame)//有数据
 			{
+				audioOutput->pts = frame->pts * av_q2d(audioOutput->timebase);
+
 				//判断采样格式,初始化重采样器
 				if ((frame->format != audioOutput->getDetTgt().fmt
 					|| frame->sample_rate != audioOutput->getDetTgt().freq
@@ -107,12 +108,14 @@ void sdl_audio_callback(void* userdata, Uint8* stream, int len)
 		}
 		else
 		{
-			memcpy(stream, audioOutput->audioBuf + audioOutput->audioBufIndex, len3);
+			//memcpy(stream, audioOutput->audioBuf + audioOutput->audioBufIndex, len3);
+			SDL_memset(stream, 0, len3);
+			SDL_MixAudioFormat(stream, (uint8_t*)audioOutput->audioBuf + audioOutput->audioBufIndex, AUDIO_S16SYS, len3, SDL_MIX_MAXVOLUME);//调节音量大小 0-128  最大为SDL_MIX_MAXVOLUME
 		}
 		len -= len3;
 		audioOutput->audioBufIndex += len3;
 		stream += len3;
-		printf("len:%d, audioBufIndex:%d, %d\n", len, audioOutput->audioBufIndex, audioOutput->audioBufSize);
+		printf("len:%d, audioBufIndex:%d, audioBufSize:%d\n", len, audioOutput->audioBufIndex, audioOutput->audioBufSize);
 	}
 	printf("audio pts:%0.3lf\n", audioOutput->pts);
 	audioOutput->avsync->SetClock(audioOutput->pts);
@@ -143,8 +146,7 @@ int AudioOutput::Init()
 	av_channel_layout_default(&detTgt.ch_layout, wantedSpec.channels);
 	detTgt.fmt = AV_SAMPLE_FMT_S16;
 	detTgt.freq = wantedSpec.freq;
-	SDL_PauseAudio(0);
-
+	
 	printf("AudioOutput Init finish\n");
 	return 0;
 }
@@ -154,6 +156,18 @@ int AudioOutput::DeInit()
 	SDL_PauseAudio(1);
 	SDL_CloseAudio();
 	printf("AudioOutput::DeInit\n");
+	return 0;
+}
+
+int AudioOutput::Start()
+{
+	SDL_PauseAudio(0);
+	return 0;
+}
+
+int AudioOutput::Pause()
+{
+	SDL_PauseAudio(1);
 	return 0;
 }
 

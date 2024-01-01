@@ -15,7 +15,9 @@ public:
 	void Abort();
 	int Size();
 	int Push(AVPacket* val);
+	int Clear();
 	AVPacket* Pop(const int timeout);
+	AVPacket* Front();
 
 private:
 	void release();//สอทลืสิด

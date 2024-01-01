@@ -8,7 +8,7 @@
 class DecodeThread : public Thread
 {
 public:
-	DecodeThread(AVPacketQueue* packetQueue, AVFrameQueue* frameQueue, std::string threadName);
+	DecodeThread(AVPacketQueue* packetQueue, AVFrameQueue* frameQueue, AVRational timeBase, std::string threadName);
 	~DecodeThread();
 
 	int Init(AVCodecParameters *par);//½âÂëÆ÷³õÊ¼»¯
@@ -24,5 +24,6 @@ private:
 	AVCodecContext* codecCtx = nullptr;
 	AVPacketQueue* packetQueue = nullptr;
 	AVFrameQueue* frameQueue = nullptr;
+	AVRational timebase;
 };
 
