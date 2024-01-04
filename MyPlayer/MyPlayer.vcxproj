@@ -108,6 +108,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MyPlayer.cpp" />
     <ClCompile Include="PlayerControl.cpp" />
+    <ClCompile Include="PreviewLabel.cpp" />
     <ClCompile Include="Slider.cpp" />
     <ClCompile Include="Thread.cpp" />
     <ClCompile Include="VideoOutput.cpp" />
@@ -121,6 +122,7 @@
     <ClInclude Include="DemuxThread.h" />
     <QtMoc Include="MyPlayer.h" />
     <ClInclude Include="PlayerControl.h" />
+    <QtMoc Include="PreviewLabel.h" />
     <ClInclude Include="Queue.h" />
     <QtMoc Include="Slider.h" />
     <ClInclude Include="Thread.h" />

@@ -8,6 +8,7 @@
 #include <QDebug>
 #include <QMessageBox>
 #include "Slider.h"
+#include "PreviewLabel.h"
 #include "VideoOutput.h"
 #include "PlayerControl.h"
 
@@ -33,9 +34,12 @@ public slots:
 	void PlayOrPause();
 	void SliderPress();
 	void SliderRelease();
+    void SliderOn(int moveTime, int x, int y);
+    void SliderLeave();
 	void SetNowPts(int time);
 
 private:
+    QString fileName;
 	PlayerControl playerControl;
 	bool isSliderPress = false;
 	bool isPause = false;
@@ -51,6 +55,7 @@ public:
     Slider* playPos;
     QLabel* endtimeLabel;
     QPushButton* isplay;
+    PreviewLabel* previewLabel;
 
     void setupUi(QWidget* PlayClass)
     {
@@ -78,12 +83,18 @@ public:
         isplay = new QPushButton(PlayClass);
         isplay->setObjectName(QString::fromUtf8("isplay"));
         isplay->setGeometry(QRect(660, 630, 91, 41));
+        previewLabel = new PreviewLabel(PlayClass);
+        previewLabel->setObjectName(QString::fromUtf8("previewLabel"));
+        previewLabel->setGeometry(QRect(400, 150, 480, 420));
+        previewLabel->setVisible(false);
 
         retranslateUi(PlayClass);
         QObject::connect(openFile, SIGNAL(clicked()), PlayClass, SLOT(OpenFile()));
         QObject::connect(isplay, SIGNAL(clicked()), PlayClass, SLOT(PlayOrPause()));
         QObject::connect(playPos, SIGNAL(sliderPressed()), PlayClass, SLOT(SliderPress()));
         QObject::connect(playPos, SIGNAL(sliderReleased()), PlayClass, SLOT(SliderRelease()));
+        QObject::connect(playPos, SIGNAL(showPreview(int, int, int)), PlayClass, SLOT(SliderOn(int, int, int)));
+        QObject::connect(playPos, SIGNAL(closePreview()), PlayClass, SLOT(SliderLeave()));
         //QObject::connect(&dt, SIGNAL(setNowTime(int)), PlayClass, SLOT(SetNowPts(int)));
 
         QMetaObject::connectSlotsByName(PlayClass);
