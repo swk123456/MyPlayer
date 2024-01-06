@@ -42,9 +42,12 @@ int DecodeThread::Init(AVCodecParameters* par)
 
 int DecodeThread::Start()
 {
-	if (thread_ && pause_ == 1)
+	if (thread_)
 	{
-		pause_ = 0;
+		if (pause_ == 1)
+		{
+			pause_ = 0;
+		}
 		return 0;
 	}
 	thread_ = new std::thread(&DecodeThread::Run, this);

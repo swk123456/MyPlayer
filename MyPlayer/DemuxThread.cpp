@@ -55,9 +55,12 @@ int DemuxThread::Init(const char* url, long long& totalPts)
 
 int DemuxThread::Start()
 {
-	if (thread_ && pause_ == 1)
+	if (thread_)
 	{
-		pause_ = 0;
+		if (pause_ == 1)
+		{
+			pause_ = 0;
+		}
 		return 0;
 	}
 	thread_ = new std::thread(&DemuxThread::Run, this);

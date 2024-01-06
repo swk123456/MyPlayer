@@ -4,12 +4,17 @@ PreviewLabel::PreviewLabel(QWidget* parent)
 	: QWidget(parent)
 {
 	layout = new QVBoxLayout(this);
+    layout->setAlignment(Qt::AlignCenter);
 	pictureLabel = new QLabel(this);
-    pictureLabel->setFixedSize(480, 320);
+    pictureLabel->setFixedSize(320, 180);
+    timeLayout = new QHBoxLayout();
+    timeLayout->setAlignment(Qt::AlignCenter);
     timeLabel = new QLabel(this);
-    timeLabel->setFixedSize(200, 100);
+    timeLabel->setFixedSize(320, 20);
+    timeLabel->setAlignment(Qt::AlignCenter);
+    timeLayout->addWidget(timeLabel);
 	layout->addWidget(pictureLabel);
-	layout->addWidget(timeLabel);
+	layout->addLayout(timeLayout);
 }
 
 void PreviewLabel::setTime(QString fileName, int time)
@@ -76,11 +81,35 @@ void PreviewLabel::Run()
         image = generateVideoPreview(newFilePath, time);
         if (image)
         {
-            QPixmap pixmap = QPixmap::fromImage(image->scaled(QSize(480, 320), Qt::KeepAspectRatio));
+            QPixmap pixmap = QPixmap::fromImage(image->scaled(QSize(320, 180), Qt::KeepAspectRatio));
             pictureLabel->setPixmap(pixmap);
             pause_ = 1;
         }
     }
+}
+
+void PreviewLabel::paintEvent(QPaintEvent* event)
+{
+    Q_UNUSED(event);
+
+    QPainter painter(this);
+
+    // 设置绘制的颜色和样式
+    painter.setPen(Qt::black);
+
+    QPainterPath path;
+    path.moveTo(0, 0);
+    path.lineTo(0, height() - 10);
+    path.lineTo(width() / 2 - 5, height() - 10);
+    path.lineTo(width() / 2, height());
+    path.lineTo(width() / 2 + 5, height() - 10);
+    path.lineTo(width() - 1, height() - 10);
+    path.lineTo(width() - 1, 0);
+    path.closeSubpath();
+
+    // 绘制路径并填充颜色
+    painter.drawPath(path);
+    painter.fillPath(path, Qt::white);
 }
 
 QImage* PreviewLabel::generateVideoPreview(const QString& videoFilePath, int time)
@@ -192,25 +221,8 @@ QImage* PreviewLabel::generateVideoPreview(const QString& videoFilePath, int tim
                     continue;
                 }
                 // 转换帧到RGB格式
-                struct SwsContext* swsContext = sws_getContext(
-                    codecContext->width, codecContext->height, codecContext->pix_fmt,
-                    codecContext->width, codecContext->height, AV_PIX_FMT_RGB24,
-                    SWS_BILINEAR, nullptr, nullptr, nullptr);
-
-                if (swsContext != nullptr) {
-                    QImage* image = new QImage(codecContext->width, codecContext->height, QImage::Format_RGB32);
-                    uint8_t* data[1] = { reinterpret_cast<uint8_t*>(image->bits()) };
-                    int linesize[1] = { 4 * codecContext->width };
-
-                    sws_scale(swsContext, frame->data, frame->linesize, 0, codecContext->height, data, linesize);
-                    sws_freeContext(swsContext);
-
-                    // 释放帧和包
-                    av_frame_free(&frame);
-                    av_packet_unref(&packet);
-
-                    return image;
-                }
+                av_packet_unref(&packet);
+                return getQImageFromFrame(frame);
             }
 
             av_frame_free(&frame);
@@ -220,4 +232,66 @@ QImage* PreviewLabel::generateVideoPreview(const QString& videoFilePath, int tim
     }
 
     return nullptr;
+}
+
+QImage* PreviewLabel::getQImageFromFrame(AVFrame* pFrame)
+{
+    // first convert the input AVFrame to the desired format
+    SwsContext* img_convert_ctx = sws_getContext(
+        pFrame->width,
+        pFrame->height,
+        (AVPixelFormat)pFrame->format,
+        pFrame->width,
+        pFrame->height,
+        AV_PIX_FMT_RGB24,
+        SWS_BICUBIC, NULL, NULL, NULL);
+    if (!img_convert_ctx) {
+        printf("Failed to create sws context\n");
+        av_frame_free(&pFrame);
+        return nullptr;
+    }
+
+    // prepare line sizes structure as sws_scale expects
+    int rgb_linesizes[8] = { 0 };
+    rgb_linesizes[0] = 3 * pFrame->width;
+
+    // prepare char buffer in array, as sws_scale expects
+    unsigned char* rgbData[8];
+    int imgBytesSyze = 3 * pFrame->height * pFrame->width;
+    // as explained above, we need to alloc extra 64 bytes
+    rgbData[0] = (unsigned char*)malloc(imgBytesSyze + 64);
+    if (!rgbData[0]) {
+        printf("Error allocating buffer for frame conversion\n");
+        free(rgbData[0]);
+        sws_freeContext(img_convert_ctx);
+        av_frame_free(&pFrame);
+        return nullptr;
+    }
+    if (sws_scale(img_convert_ctx,
+        pFrame->data,
+        pFrame->linesize, 0,
+        pFrame->height,
+        rgbData,
+        rgb_linesizes)
+        != pFrame->height) {
+        printf("Error changing frame color range\n");
+        free(rgbData[0]);
+        sws_freeContext(img_convert_ctx);
+        av_frame_free(&pFrame);
+        return nullptr;
+    }
+
+    // then create QImage and copy converted frame data into it
+    QImage* image = new QImage(pFrame->width,
+        pFrame->height,
+        QImage::Format_RGB888);
+
+    for (int y = 0; y < pFrame->height; y++) {
+        memcpy(image->scanLine(y), rgbData[0] + y * 3 * pFrame->width, 3 * pFrame->width);
+    }
+
+    free(rgbData[0]);
+    sws_freeContext(img_convert_ctx);
+    av_frame_free(&pFrame);
+    return image;
 }

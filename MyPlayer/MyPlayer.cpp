@@ -32,6 +32,16 @@ void MyPlayer::SliderRelease()
 void MyPlayer::SliderOn(int moveTime, int x, int y)
 {
 	ui->previewLabel->setTime(fileName, moveTime);
+	int moveToX = x + ui->playPos->x() - ui->previewLabel->width() / 2, moveToY = ui->playPos->y() - ui->previewLabel->height();
+	if (x - ui->previewLabel->width() / 2 < 0)//×î×ó²à
+	{
+		moveToX = ui->playPos->x();
+	}
+	else if (x + ui->previewLabel->width() / 2 > ui->playPos->width())//×îÓÒ²à
+	{
+		moveToX = ui->playPos->x() + ui->playPos->width() - ui->previewLabel->width();
+	}
+	ui->previewLabel->move(moveToX, moveToY);
 	ui->previewLabel->setVisible(true);
 }
 
@@ -95,13 +105,11 @@ void MyPlayer::PlayOrPause()
 	if (isPause)
 	{
 		ui->isplay->setText(QString::fromLocal8Bit("ÔÝÍ£"));
-		playerControl.status = 0;
 		playerControl.Start();
 	}
 	else
 	{
 		ui->isplay->setText(QString::fromLocal8Bit("²¥·Å"));
-		playerControl.status = 1;
 		playerControl.Pause();
 	}
 }
@@ -117,6 +125,7 @@ void MyPlayer::OpenFile()
 		QMessageBox::information(0, "error", "open file failed!");
 		return;
 	}
+	ui->isplay->setText(QString::fromLocal8Bit("²¥·Å"));
 	int totalTime = playerControl.GetTotalPts();
 	ui->nowtimeLabel->setText(QString("00:00"));
 	ui->endtimeLabel->setText(QString("%1:%2").arg(totalTime / 60).arg(totalTime % 60, 2, 10, QLatin1Char('0')));

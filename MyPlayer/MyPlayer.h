@@ -34,8 +34,8 @@ public slots:
 	void PlayOrPause();
 	void SliderPress();
 	void SliderRelease();
-    void SliderOn(int moveTime, int x, int y);
-    void SliderLeave();
+    void SliderOn(int moveTime, int x, int y);//鼠标移动到进度条
+    void SliderLeave();//鼠标移开进度条
 	void SetNowPts(int time);
 
 private:
@@ -74,7 +74,7 @@ public:
         playPos = new Slider(PlayClass);
         playPos->setObjectName(QString::fromUtf8("playPos"));
         playPos->setGeometry(QRect(65, 680, 1150, 31));
-        playPos->setMaximum(999);
+        playPos->setMaximum(99999);
         playPos->setPageStep(1);
         playPos->setOrientation(Qt::Horizontal);
         endtimeLabel = new QLabel(PlayClass);
@@ -85,7 +85,7 @@ public:
         isplay->setGeometry(QRect(660, 630, 91, 41));
         previewLabel = new PreviewLabel(PlayClass);
         previewLabel->setObjectName(QString::fromUtf8("previewLabel"));
-        previewLabel->setGeometry(QRect(400, 150, 480, 420));
+        previewLabel->setGeometry(QRect(460, 130, 360, 240));
         previewLabel->setVisible(false);
 
         retranslateUi(PlayClass);

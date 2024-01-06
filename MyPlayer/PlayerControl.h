@@ -15,21 +15,20 @@ public:
     void SetSize(int video_width, int video_height);
     int Start();
     void ResetStart(double pos);//切换位置开始
-    void CleanThread();
     int Pause();
 
-public:
-    int status = 1;//当前播放状态  0正在播放   1暂停
-
 private:
+    int Play();//开始播放
     int ClearAllQueue();
+    void CleanThread();
+    int StartThread();//开启解复用、解码线程
 
 private:
     std::string urlStr;
     long long totalPts = 0;//总时长
     double nowPts = 0;//当前播放位置
     long long nowStartPts = 0;//当前播放开始位置
-
+    int status = -1;//当前播放状态  0正在播放   1暂停   -1还未第一次播放当前
 
     AVPacketQueue audioPacketQueue, videoPacketQueue;
     AVFrameQueue audioFrameQueue, videoFrameQueue;

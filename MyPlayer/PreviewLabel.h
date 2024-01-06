@@ -2,6 +2,9 @@
 #include <QWidget>
 #include <QLabel>
 #include <QVBoxLayout>
+#include <QHBoxLayout>
+#include <QPainter>
+#include <QPainterPath>
 #include <iostream>
 #include "Thread.h"
 
@@ -25,11 +28,16 @@ public:
 	virtual int Stop();
 	virtual void Run();
 
+protected:
+	void paintEvent(QPaintEvent* event) override;//重新绘制组件
+
 private:
 	QImage* generateVideoPreview(const QString& videoFilePath, int time);
+	QImage* getQImageFromFrame(AVFrame* pFrame);
 
 private:
 	QVBoxLayout* layout = nullptr;
+	QHBoxLayout* timeLayout = nullptr;
 	QLabel* timeLabel = nullptr;
 	QLabel* pictureLabel = nullptr;
 

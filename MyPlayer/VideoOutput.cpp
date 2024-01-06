@@ -129,6 +129,29 @@ void VideoOutput::ResetSize(int video_width, int video_height)
 	videoHeight = video_height;
 }
 
+int VideoOutput::ShowFirstFrame()
+{
+	AVFrame* frame = nullptr;
+	frame = frameQueue->Front();
+	if (frame)
+	{
+		SDL_Rect rect;
+		rect.x = 0;
+		rect.y = 0;
+		rect.w = videoWidth;
+		rect.h = videoHeight;
+		SDL_UpdateYUVTexture(texture, &rect,
+			frame->data[0], frame->linesize[0],
+			frame->data[1], frame->linesize[1],
+			frame->data[2], frame->linesize[2]);
+		SDL_RenderClear(renderer);
+		SDL_RenderCopy(renderer, texture, NULL, &rect);
+		SDL_RenderPresent(renderer);
+		return 0;
+	}
+	return -1;
+}
+
 void VideoOutput::videoRefresh(double& remainTime)
 {
 	AVFrame* frame = nullptr;

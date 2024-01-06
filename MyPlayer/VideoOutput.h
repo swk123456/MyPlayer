@@ -25,6 +25,8 @@ public:
 
 	void ResetSize(int video_width, int video_height);
 
+	int ShowFirstFrame();
+
 public slots:
 	int Start();
 	int Pause();

@@ -112,6 +112,7 @@
     <ClCompile Include="Slider.cpp" />
     <ClCompile Include="Thread.cpp" />
     <ClCompile Include="VideoOutput.cpp" />
+    <ClCompile Include="VolumeAdjusterSlider.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AudioOutput.h" />
@@ -120,6 +121,7 @@
     <ClInclude Include="AVSync.h" />
     <ClInclude Include="DecodeThread.h" />
     <ClInclude Include="DemuxThread.h" />
+    <QtMoc Include="VolumeAdjusterSlider.h" />
     <QtMoc Include="MyPlayer.h" />
     <ClInclude Include="PlayerControl.h" />
     <QtMoc Include="PreviewLabel.h" />

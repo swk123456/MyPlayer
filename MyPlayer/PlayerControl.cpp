@@ -66,6 +66,8 @@ int PlayerControl::Init(std::string url_str, VideoOutput* video_output)
         return -1;
     }
     videoOutput->show();
+
+    status = -1;
     
 	return 0;
 }
@@ -77,6 +79,10 @@ double PlayerControl::GetTotalPts()
 
 double PlayerControl::GetNowPts()
 {
+    if (status == -1)
+    {
+        return 0;
+    }
     AVFrame* frame = audioOutput->getFrameQueue()->Front();
     if (frame)
     {
@@ -94,6 +100,29 @@ void PlayerControl::SetSize(int video_width, int video_height)
 }
 
 int PlayerControl::Start()
+{
+    int ret = 0;
+    if (status == -1)
+    {
+        int ret = StartThread();
+        if (ret < 0)
+        {
+            printf("%s(%d) PlayerControl StartThread\n", __FUNCTION__, __LINE__);
+            return ret;
+        }
+    }
+
+    ret = Play();
+    if (ret < 0)
+    {
+        printf("%s(%d) PlayerControl Play\n", __FUNCTION__, __LINE__);
+        return ret;
+    }
+
+    return 0;
+}
+
+int PlayerControl::StartThread()
 {
     //解复用线程
     int ret = demuxThread->Start();
@@ -125,6 +154,24 @@ int PlayerControl::Start()
         return -1;
     }
 
+    while (videoFrameQueue.Size() <= 0)
+    {
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));
+        continue;
+    }
+
+    ret = videoOutput->ShowFirstFrame();
+    if (ret < 0)
+    {
+        printf("%s(%d) videoOutput ShowFirstFrame\n", __FUNCTION__, __LINE__);
+        return -1;
+    }
+
+    return 0;
+}
+
+int PlayerControl::Play()
+{
     //解码出的帧过少时不播放
     while (audioFrameQueue.Size() < 10 || videoFrameQueue.Size() < 10)
     {
@@ -133,7 +180,7 @@ int PlayerControl::Start()
     }
 
     //音频转换输出
-    ret = audioOutput->Start();
+    int ret = audioOutput->Start();
     if (ret < 0)
     {
         printf("%s(%d) audioOutput Start\n", __FUNCTION__, __LINE__);
@@ -147,6 +194,9 @@ int PlayerControl::Start()
         printf("%s(%d) videoOutput Start\n", __FUNCTION__, __LINE__);
         return -1;
     }
+
+    status = 0;
+
     videoOutput->MainLoop();
 
     return 0;
@@ -159,6 +209,8 @@ void PlayerControl::ResetStart(double pos)
         return;
     }
 
+    int tmpStatus = status;
+
     Init(urlStr, videoOutput);
 
     nowStartPts = pos * totalPts;
@@ -170,9 +222,18 @@ void PlayerControl::ResetStart(double pos)
         std::cout << "ResetStartPts failed" << std::endl;
     }
 
-    if (status == 0)
+    StartThread();
+
+    status = tmpStatus;
+    std::cout << "ResetStartPts success" << std::endl;
+
+    if (status == -1)
     {
-        Start();
+        status = 1;
+    }
+    else if (status == 0)
+    {
+        Play();
     }
 }
 
@@ -266,6 +327,8 @@ int PlayerControl::Pause()
             return -1;
         }
     }
+
+    status = 1;
 
     return 0;
 }
