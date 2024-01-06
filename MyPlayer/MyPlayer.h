@@ -64,7 +64,7 @@ public:
         PlayClass->resize(1280, 720);
         video = new VideoOutput(PlayClass);
         video->setObjectName(QString::fromUtf8("video"));
-        video->setGeometry(QRect(0, 0, 640, 360));
+        video->setGeometry(QRect(0, 0, 1280, 720));
         openFile = new QPushButton(PlayClass);
         openFile->setObjectName(QString::fromUtf8("openFile"));
         openFile->setGeometry(QRect(560, 630, 81, 41));

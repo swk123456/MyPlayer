@@ -112,16 +112,20 @@ void DecodeThread::Run()
 				break;
 			}
 			ret = avcodec_receive_frame(codecCtx, frame);
-			if (ret == 0)
-			{
-				double pts = frame->pts * av_q2d(timebase);
-				frameQueue->Push(frame);
-				printf("%s frameQueue size:%d, pts:%lf\n", threadName.c_str(), frameQueue->Size(), pts);
-				continue;
-			}
-			else if (ret == AVERROR(EAGAIN))
+			if (ret == AVERROR(EAGAIN))
 			{
 				break;
+			}
+			else if (ret == 0)
+			{
+				double pts = frame->pts * av_q2d(timebase);
+				printf("%s frameQueue size:%d, pts:%0.3lf, startPts:%lld\n", threadName.c_str(), frameQueue->Size(), pts, startPts);
+				if (pts * 1000000 < startPts)
+				{
+					continue;
+				}
+				frameQueue->Push(frame);
+				continue;
 			}
 			else
 			{
@@ -134,6 +138,11 @@ void DecodeThread::Run()
 		//°Ñframe·¢ËÍ¸øframeQueue
 
 	}
+}
+
+void DecodeThread::ResetStartPts(long long pts)
+{
+	startPts = pts;
 }
 
 AVCodecContext* DecodeThread::getAVCodecContext()

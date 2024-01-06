@@ -16,11 +16,14 @@ public:
 	int Stop();
 	void Run();
 
+	void ResetStartPts(long long pts);
+
 	AVCodecContext* getAVCodecContext();
 
 private:
 	char errStr[256] = { 0 };
 	std::string threadName = nullptr;
+	long long startPts = 0;
 	AVCodecContext* codecCtx = nullptr;
 	AVPacketQueue* packetQueue = nullptr;
 	AVFrameQueue* frameQueue = nullptr;

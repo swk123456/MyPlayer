@@ -1,6 +1,6 @@
 #include "PlayerControl.h"
 
-int PlayerControl::Init(std::string url_str, VideoOutput* video_output)
+int PlayerControl::Init(std::string url_str, VideoOutput* video_output, bool isStartThread)
 {
     //Çå³ýÊý¾Ý
     Pause();
@@ -68,6 +68,11 @@ int PlayerControl::Init(std::string url_str, VideoOutput* video_output)
     videoOutput->show();
 
     status = -1;
+
+    if (isStartThread)
+    {
+        StartThread();
+    }
     
 	return 0;
 }
@@ -167,6 +172,8 @@ int PlayerControl::StartThread()
         return -1;
     }
 
+    status = 1;
+
     return 0;
 }
 
@@ -222,16 +229,14 @@ void PlayerControl::ResetStart(double pos)
         std::cout << "ResetStartPts failed" << std::endl;
     }
 
+    audioDecodeThread->ResetStartPts(nowStartPts);
+    videoDecodeThread->ResetStartPts(nowStartPts);
+
     StartThread();
 
-    status = tmpStatus;
     std::cout << "ResetStartPts success" << std::endl;
 
-    if (status == -1)
-    {
-        status = 1;
-    }
-    else if (status == 0)
+    if (tmpStatus == 0)
     {
         Play();
     }

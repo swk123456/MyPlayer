@@ -120,11 +120,12 @@ void MyPlayer::OpenFile()
 	fileName = QFileDialog::getOpenFileName(this, QString::fromLocal8Bit("选择视频文件"));
 	if (fileName.isEmpty())return;
 	this->setWindowTitle(fileName);
-	if (playerControl.Init(fileName.toStdString(), ui->video) < 0)
+	if (playerControl.Init(fileName.toStdString(), ui->video, true) < 0)
 	{
 		QMessageBox::information(0, "error", "open file failed!");
 		return;
 	}
+	isPause = false;
 	ui->isplay->setText(QString::fromLocal8Bit("播放"));
 	int totalTime = playerControl.GetTotalPts();
 	ui->nowtimeLabel->setText(QString("00:00"));

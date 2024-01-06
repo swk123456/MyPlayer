@@ -9,7 +9,7 @@
 class PlayerControl
 {
 public:
-    int Init(std::string urlStr, VideoOutput* videoOutput);
+    int Init(std::string urlStr, VideoOutput* videoOutput, bool isStartThread = false);
     double GetTotalPts();
     double GetNowPts();
     void SetSize(int video_width, int video_height);

@@ -13,8 +13,6 @@ int VideoOutput::Init(AVSync* avsync_, AVFrameQueue* frame_queue, int video_widt
 {
 	avsync = avsync_;
 	frameQueue = frame_queue;
-	videoWidth = video_width;
-	videoHeight = video_height;
 	timebase = time_base;
 
 	if (SDL_Init(SDL_INIT_VIDEO))
@@ -37,7 +35,7 @@ int VideoOutput::Init(AVSync* avsync_, AVFrameQueue* frame_queue, int video_widt
 		return -1;
 	}
 	texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_IYUV, SDL_TEXTUREACCESS_STREAMING
-		, videoWidth, videoHeight);
+		, video_width, video_height);
 	if (!texture)
 	{
 		printf("SDL_CreateTexture failed\n");
@@ -62,6 +60,7 @@ int VideoOutput::MainLoop()
 	{
 		if (pause_)
 		{
+			ShowFirstFrame();
 			std::this_thread::sleep_for(std::chrono::milliseconds(500));
 		}
 		RefreshLoopWaitEvent(&event);
